@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  NotifyChatbotWorkspaceId:
+    Type: String
+    Description: Chatbot Workspace ID
+    Default: XXXXXXXXX
+
+Resources:
+  # Chatbot Role
+  ChatbotRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: aws-chatbot-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: chatbot.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess
+
+  # Chatbot Channel
+  ChatbotDev:
+    Type: AWS::Chatbot::SlackChannelConfiguration
+    Properties: 
+      ConfigurationName: channel-name-dev
+      IamRoleArn: !GetAtt ChatbotRole.Arn
+      LoggingLevel: NONE
+      SlackChannelId: YYYYYYYY
+      SlackWorkspaceId: !Ref NotifyChatbotWorkspaceId
+      SnsTopicArns: 
+        - Fn::ImportValue: guard-duty-topic-arn
+
+Outputs:
+  ChatbotGitHubBackendArn:
+    Value: !GetAtt ChatbotDev.Arn
+    Export:
+      Name: chatbot-dev-arn

@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  # 通知ルール
+  PipelineNotificationRule:
+    Type: AWS::CodeStarNotifications::NotificationRule
+    Properties:
+      Name: codebuild-notification-rule
+      DetailType: FULL
+      Resource:
+        # CodeBuild の ARN をエクスポートしている前提
+        Fn::ImportValue: codebuild-arn
+      EventTypeIds:
+        - codebuild-project-build-state-in-progress
+        - codebuild-project-build-state-succeeded
+        - codebuild-project-build-state-failed
+      Targets:
+        -
+          TargetType: AWSChatbotSlack
+          TargetAddress:
+            Fn::ImportValue: chatbot-dev-arn
